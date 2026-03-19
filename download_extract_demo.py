@@ -80,8 +80,8 @@ def download_roman_cutouts(coords,filter_roman, split_size=4, fpath=None):
         else: raise ValueError(f"Provided path {fpath} does not exist. Please provide a valid path or set path to None to save in current working directory.")
     else:
         fpath = os.getcwd()
-    for coord in tqdm(coords):
-        coadd_roman,coadd_fname = get_roman_coadd(coord, filter_roman)
+    for i in tqdm(range(len(coords))):
+        coadd_roman,coadd_fname = get_roman_coadd(coords[i], filter_roman)
         coadd_data = coadd_roman['data']
         if split_size is not None:
             idx=np.linspace(0,coadd_data.shape[0],split_size+1,dtype=int)
