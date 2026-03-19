@@ -90,11 +90,12 @@ def download_roman_cutouts(coords,filter_roman, split_size=4, fpath=None):
                 cut1 = coadd_data[idx[i]:idx[i+1]]
                 for j in range(split_size):
                     cut2 = cut1[:, idx[j]:idx[j+1]]
-                    cutout_fname = f"{coadd_fname}_cut_{i}_{j}.npy"
-                    path = os.path.join(fpath, 'data', cutout_fname)
-                    np.save(path,cut2.astype(np.float32))
-                    annots['path'].append(path)
-                    annots['img'].append(cutout_fname)
+                    if cut2.max()>1000:
+                        cutout_fname = f"{coadd_fname}_cut_{i}_{j}.npy"
+                        path = os.path.join(fpath, 'data', cutout_fname)
+                        np.save(path,cut2.astype(np.float32))
+                        annots['path'].append(path)
+                        annots['img'].append(cutout_fname)
         else:           
             path = os.path.join(fpath, 'data', coadd_fname+'.npy')
             np.save(path,coadd_roman['data'].astype(np.float32))
@@ -110,7 +111,11 @@ def download_roman_cutouts(coords,filter_roman, split_size=4, fpath=None):
 
 if __name__ == "__main__":
     # annots = {'path':[], 'img':[]}
-    fpath = '/projects/bfpq/work/aberres2/demo_roman2'
+    fpath = './roman_cutouts'
+    if os.path.exists(fpath): pass
+    else: 
+        os.makedirs(fpath)
+        os.makedirs(os.path.join(fpath, 'data'))
     coords=[]
     for i in range(ra_block_centers.size): #ra_block_centers.size
         coord = SkyCoord(ra=ra_block_centers[i], dec=dec_block_centers[i], unit="deg")
