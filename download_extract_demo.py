@@ -158,7 +158,8 @@ if __name__ == "__main__":
         coord = SkyCoord(ra=ra_block_centers[i], dec=dec_block_centers[i], unit="deg")
         coords.append(coord)
     filter_roman = 'H158' #F184, H158, J129, K213, and Y106 are available in the data preview
-    annots=download_roman_cutouts(coords,filter_roman,fpath=fpath, split_size=42)
+    # annots=download_roman_cutouts(coords,filter_roman,fpath=fpath, split_size=42)
+    annots=save_centered_cutout(coords,filter_roman, cutout_size=64, fpath=fpath)
         # annots['path'].append(path)
         # annots['img'].append(path.split('/')[-1])
 
