@@ -14,6 +14,7 @@ from io import BytesIO
 import os
 import pandas as pd
 from tqdm import tqdm
+from skimage.feature import peak_local_max
 
 
 # Open Universe Roman and Rubin Preview Paths
@@ -103,7 +104,43 @@ def download_roman_cutouts(coords,filter_roman, split_size=4, fpath=None):
             annots['img'].append(coadd_fname+'.npy')
     return annots
     # return path
+ 
 
+def save_centered_cutout(coords, filter_roman, cutout_size=64, fpath=None):
+    annots = {'path':[], 'img':[]}
+    if fpath is not None:
+        if os.path.exists(fpath): pass
+        else: raise ValueError(f"Provided path {fpath} does not exist. Please provide a valid path or set path to None to save in current working directory.")
+    else:
+        fpath = os.getcwd()
+    for i in tqdm(range(len(coords))):
+        coadd_roman,coadd_fname = get_roman_coadd(coords[i], filter_roman)
+        img = coadd_roman['data']
+        # coadd_wcs = coadd_roman['wcs']
+        coordinates = peak_local_max(
+            img,
+            min_distance=20,
+            threshold_abs=200,
+            num_peaks=100,
+        )
+        x,y = coordinates[:, 1], coordinates[:, 0]
+        mask = (x > cutout_size) & (x < img.shape[2]-cutout_size) & (y > cutout_size) & (y < img.shape[1]-cutout_size)
+        coods_x  = x[mask]
+        coods_y = y[mask]
+        for j in range(len(coods_x)):
+            cut_slice = Cutout2D(img, (coods_x[j], coods_y[j]), (cutout_size, cutout_size)).slices_original
+            img_cutout = img[cut_slice[0], cut_slice[1]]
+            cutout_fname = f"{coadd_fname}_cut_{j}.npy"
+            path = os.path.join(fpath, 'data', cutout_fname)
+            np.save(path,img_cutout.astype(np.float32))
+            annots['path'].append(path)
+            annots['img'].append(cutout_fname)
+        if len(annots['path'])>250:
+            print("Saved 250 cutouts, stopping to save time and disk space.")
+            break
+        
+     
+    return annots
 
 
 # coord = SkyCoord(ra=9.6055383, dec=-44.1895542, unit="deg")
