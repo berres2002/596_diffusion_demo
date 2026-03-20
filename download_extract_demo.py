@@ -117,6 +117,7 @@ def save_centered_cutout(coords, filter_roman, cutout_size=64, fpath=None):
         coadd_roman,coadd_fname = get_roman_coadd(coords[i], filter_roman)
         img = coadd_roman['data']
         # coadd_wcs = coadd_roman['wcs']
+        assert img.ndim == 2, "Expected 2D image data from coadd fits file"
         coordinates = peak_local_max(
             img,
             min_distance=20,
@@ -124,7 +125,7 @@ def save_centered_cutout(coords, filter_roman, cutout_size=64, fpath=None):
             num_peaks=100,
         )
         x,y = coordinates[:, 1], coordinates[:, 0]
-        mask = (x > cutout_size) & (x < img.shape[2]-cutout_size) & (y > cutout_size) & (y < img.shape[1]-cutout_size)
+        mask = (x > cutout_size) & (x < img.shape[1]-cutout_size) & (y > cutout_size) & (y < img.shape[0]-cutout_size)
         coods_x  = x[mask]
         coods_y = y[mask]
         for j in range(len(coods_x)):
